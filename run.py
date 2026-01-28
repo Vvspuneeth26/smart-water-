@@ -12,15 +12,17 @@ def make_shell_context():
 @app.cli.command()
 def init_db():
     """Initialize the database"""
-    db.create_all()
-    print('Database initialized.')
+    with app.app_context():
+        db.create_all()
+        print('Database initialized.')
 
 @app.cli.command()
 def drop_db():
     """Drop all database tables"""
     if input('Are you sure? (y/n): ').lower() == 'y':
-        db.drop_all()
-        print('Database dropped.')
+        with app.app_context():
+            db.drop_all()
+            print('Database dropped.')
 
 @app.cli.command()
 def seed_db():
@@ -42,46 +44,48 @@ def seed_db():
 
     base_date = datetime.utcnow() - timedelta(days=7)
 
-    for i in range(50):
-        timestamp = base_date + timedelta(hours=random.randint(0, 168))
-        lat, lon = random.choice(locations)
+    with app.app_context():
+        for i in range(50):
+            timestamp = base_date + timedelta(hours=random.randint(0, 168))
+            lat, lon = random.choice(locations)
 
-        reading = WaterReading(
-            timestamp=timestamp,
-            latitude=lat + random.uniform(-0.1, 0.1),
-            longitude=lon + random.uniform(-0.1, 0.1),
-            water_type=random.choice(water_types),
-            chlorophyll=round(random.uniform(0.1, 50.0), 2),
-            pigments=round(random.uniform(0.05, 30.0), 2),
-            total_alkalinity=round(random.uniform(50.0, 200.0), 2),
-            dic=round(random.uniform(1.0, 5.0), 2),
-            temperature=round(random.uniform(5.0, 35.0), 1),
-            sensor_id=random.choice(sensor_ids)
-        )
-        db.session.add(reading)
+            reading = WaterReading(
+                timestamp=timestamp,
+                latitude=lat + random.uniform(-0.1, 0.1),
+                longitude=lon + random.uniform(-0.1, 0.1),
+                water_type=random.choice(water_types),
+                chlorophyll=round(random.uniform(0.1, 50.0), 2),
+                pigments=round(random.uniform(0.05, 30.0), 2),
+                total_alkalinity=round(random.uniform(50.0, 200.0), 2),
+                dic=round(random.uniform(1.0, 5.0), 2),
+                temperature=round(random.uniform(5.0, 35.0), 1),
+                sensor_id=random.choice(sensor_ids)
+            )
+            db.session.add(reading)
 
-    db.session.commit()
-    print('Database seeded with 50 sample readings.')
+        db.session.commit()
+        print('Database seeded with 50 sample readings.')
 
 @app.cli.command()
 def create_admin():
     """Create default admin user for login"""
     from app.models import User
 
-    admin = User.query.filter_by(username='admin').first()
-    if admin:
-        print('Admin user already exists!')
-        return
+    with app.app_context():
+        admin = User.query.filter_by(username='admin').first()
+        if admin:
+            print('Admin user already exists!')
+            return
 
-    admin_user = User(username='admin')
-    admin_user.set_password('admin')
-    db.session.add(admin_user)
-    db.session.commit()
+        admin_user = User(username='admin')
+        admin_user.set_password('admin')
+        db.session.add(admin_user)
+        db.session.commit()
 
-    print('✓ Admin user created successfully!')
-    print('Username: admin')
-    print('Password: admin')
-    print('⚠️ IMPORTANT: Change this password in production!')
+        print('✓ Admin user created successfully!')
+        print('Username: admin')
+        print('Password: admin')
+        print('⚠️ IMPORTANT: Change this password in production!')
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
