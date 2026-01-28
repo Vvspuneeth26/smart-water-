@@ -2,7 +2,7 @@ import os
 from app import create_app, db
 
 # Create Flask application
-app = create_app(os.getenv('FLASK_ENV', 'development'))
+app = create_app(os.getenv("FLASK_ENV", "development"))
 
 @app.shell_context_processor
 def make_shell_context():
@@ -14,7 +14,7 @@ def init_db():
     """Initialize the database"""
     with app.app_context():
         db.create_all()
-        print('Database initialized.')
+        print('Database initialized (Neon PostgreSQL).')
 
 @app.cli.command()
 def drop_db():
@@ -64,7 +64,7 @@ def seed_db():
             db.session.add(reading)
 
         db.session.commit()
-        print('Database seeded with 50 sample readings.')
+        print('Database seeded with 50 sample readings (Neon PostgreSQL).')
 
 @app.cli.command()
 def create_admin():
