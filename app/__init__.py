@@ -8,14 +8,17 @@ def create_app(config_name='development'):
     """Application factory"""
     app = Flask(__name__)
     
-    # Import config
+    # Load configuration (from config.py)
     from config import config
     app.config.from_object(config.get(config_name, config['default']))
     
-    # Set secret key for session management
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+    # Set secret key (Render / env safe)
+    app.config['SECRET_KEY'] = os.environ.get(
+        'SECRET_KEY',
+        app.config.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+    )
     
-    # Initialize database
+    # Initialize database (Neon PostgreSQL)
     db.init_app(app)
     
     # Register blueprints
