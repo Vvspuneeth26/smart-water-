@@ -29,26 +29,23 @@ def seed_db():
     from datetime import datetime, timedelta
     import random
 
-    # Sample data
     water_types = ['drinking', 'groundwater', 'ocean']
     sensor_ids = ['SENSOR-001', 'SENSOR-002', 'SENSOR-003']
-    
-    # Sample locations
+
     locations = [
-        (40.7128, -74.0060),  # New York
-        (51.5074, -0.1278),   # London
-        (35.6762, 139.6503),  # Tokyo
-        (48.8566, 2.3522),    # Paris
-        (37.7749, -122.4194), # San Francisco
+        (40.7128, -74.0060),   # New York
+        (51.5074, -0.1278),    # London
+        (35.6762, 139.6503),   # Tokyo
+        (48.8566, 2.3522),     # Paris
+        (37.7749, -122.4194),  # San Francisco
     ]
-    
-    # Create sample readings for the last 7 days
+
     base_date = datetime.utcnow() - timedelta(days=7)
-    
+
     for i in range(50):
         timestamp = base_date + timedelta(hours=random.randint(0, 168))
         lat, lon = random.choice(locations)
-        
+
         reading = WaterReading(
             timestamp=timestamp,
             latitude=lat + random.uniform(-0.1, 0.1),
@@ -62,7 +59,7 @@ def seed_db():
             sensor_id=random.choice(sensor_ids)
         )
         db.session.add(reading)
-    
+
     db.session.commit()
     print('Database seeded with 50 sample readings.')
 
@@ -70,22 +67,22 @@ def seed_db():
 def create_admin():
     """Create default admin user for login"""
     from app.models import User
-    
-    # Check if admin already exists
+
     admin = User.query.filter_by(username='admin').first()
     if admin:
         print('Admin user already exists!')
         return
-    
-    # Create admin user with default password 'admin'
+
     admin_user = User(username='admin')
     admin_user.set_password('admin')
     db.session.add(admin_user)
     db.session.commit()
+
     print('✓ Admin user created successfully!')
     print('Username: admin')
     print('Password: admin')
-    print('⚠️  IMPORTANT: Change this password in production!')
+    print('⚠️ IMPORTANT: Change this password in production!')
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
